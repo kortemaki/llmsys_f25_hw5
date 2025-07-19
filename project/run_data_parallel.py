@@ -187,9 +187,9 @@ if __name__ == '__main__':
     1. You can use Process from torch.distributed to define the process
     2. You should start the processes to work and terminate resources properly
     '''
-    # BEGIN ASSIGN5_1_2
+    # BEGIN ASSIGN5_1_3
     world_size = None  # TODO: Define the number of GPUs
     backend = None  # TODO: Define your backend for communication, we suggest using 'nccl'
     
     raise NotImplementedError("Data Parallel Not Implemented Yet")
-    # END ASSIGN5_1_2
+    # END ASSIGN5_1_3
