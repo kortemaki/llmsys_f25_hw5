@@ -26,7 +26,6 @@ class GPT2ModelParallel(GPT2ModelCustom):
     def __init__(self, config):
         super().__init__(config)
 
-    # ASSIGNMENT 4.2
     def _prepare_pipeline_parallel(self, split_size=1):
         '''
         Prepare the model for pipeline parallelism.
@@ -40,10 +39,10 @@ class GPT2ModelParallel(GPT2ModelCustom):
         You should construct nn.Sequential using GPT2Block modules. Notice that each block returns multiple values but you will only need the hidden states.
         '''
 
-        # BEGIN SOLUTION
+        # BEGIN ASSIGN5_2_3
         pipe = None
         raise NotImplementedError("Pipeline Parallel Not Implemented Yet")
-        # END SOLUTION
+        # END ASSIGN5_2_3
         self.h_pp = pipe
 
 class GPT2LMHeadModelParallel(GPT2LMHeadModelCustom):

@@ -41,7 +41,6 @@ class DataPartitioner():
         raise NotImplementedError("Data Parallel Not Implemented Yet")
         # END ASSIGN5_1_1
 
-# ASSIGNMENT 4.1
 def partition_dataset(rank, world_size, dataset, batch_size=128, collate_fn=None):
     """ Partitioning training dataset of the Machine Translation
 

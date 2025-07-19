@@ -14,7 +14,7 @@ from torch import nn
 import torch
 
 
-@pytest.mark.a4_1_1
+@pytest.mark.a5_1_1
 @pytest.mark.parametrize("total_num", [64, 128, 512])
 @pytest.mark.parametrize("split_size", [2, 4, 8])
 def test_data_partition(total_num, split_size):
@@ -28,7 +28,7 @@ def test_data_partition(total_num, split_size):
             visited_sets.add(d)
 
 
-@pytest.mark.a4_1_2
+@pytest.mark.a5_1_2
 def test_gradient_accumulation():
     weight0 = torch.load(f"{current_dir}/model0_gradients.pth")
     weight1 = torch.load(f"{current_dir}/model1_gradients.pth")

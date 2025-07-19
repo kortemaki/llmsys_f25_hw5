@@ -7,7 +7,6 @@ import torch.cuda
 from .worker import Task, create_workers
 from .partition import _split_module
 
-# ASSIGNMENT 4.2
 def _clock_cycles(num_batches: int, num_partitions: int) -> Iterable[List[Tuple[int, int]]]:
     '''Generate schedules for each clock cycle.
 
@@ -26,9 +25,9 @@ def _clock_cycles(num_batches: int, num_partitions: int) -> Iterable[List[Tuple[
     Each schedule is a list of tuples. Each tuple contains the index of micro-batch and the index of partition.
     This function should yield schedules for each clock cycle.
     '''
-    # BEGIN SOLUTION
+    # BEGIN ASSIGN5_2_1
     raise NotImplementedError("Schedule Generation Not Implemented Yet")
-    # END SOLUTION
+    # END ASSIGN5_2_1
 
 class Pipe(nn.Module):
     def __init__(
@@ -42,7 +41,6 @@ class Pipe(nn.Module):
         self.partitions, self.devices = _split_module(module)
         (self.in_queues, self.out_queues) = create_workers(self.devices)
 
-    # ASSIGNMENT 4.2
     def forward(self, x):
         ''' Forward the input x through the pipeline. The return value should be put in the last device.
 
@@ -54,11 +52,10 @@ class Pipe(nn.Module):
         
         Please note that you should put the result on the last device. Putting the result on the same device as input x will lead to pipeline parallel training failing.
         '''
-        # BEGIN SOLUTION
+        # BEGIN ASSIGN5_2_2
         raise NotImplementedError("Pipeline Parallel Not Implemented Yet")
-        # END SOLUTION
+        # END ASSIGN5_2_2
 
-    # ASSIGNMENT 4.2
     def compute(self, batches, schedule: List[Tuple[int, int]]) -> None:
         '''Compute the micro-batches in parallel.
 
@@ -71,7 +68,7 @@ class Pipe(nn.Module):
         partitions = self.partitions
         devices = self.devices
 
-        # BEGIN SOLUTION
+        # BEGIN ASSIGN5_2_2
         raise NotImplementedError("Pipeline Parallel Not Implemented Yet")
-        # END SOLUTION
+        # END ASSIGN5_2_2
 

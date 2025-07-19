@@ -4,7 +4,7 @@ from pipeline.partition import _split_module, WithDevice
 from torch import nn
 import torch
 
-@pytest.mark.a4_2_1
+@pytest.mark.a5_2_1
 def test_clock_cycles_0():
     m = 6
     n = 2
@@ -19,7 +19,7 @@ def test_clock_cycles_0():
     for schedule in _clock_cycles(m, n):
         assert sorted(schedule) == sorted(next(gold_schedule))
 
-@pytest.mark.a4_2_1
+@pytest.mark.a5_2_1
 def test_clock_cycles_1():
     m = 3
     n = 3
@@ -32,7 +32,7 @@ def test_clock_cycles_1():
     for schedule in _clock_cycles(m, n):
         assert sorted(schedule) == sorted(next(gold_schedule))
 
-@pytest.mark.a4_2_1
+@pytest.mark.a5_2_1
 def test_split_module_0():
     model = nn.Sequential(
           nn.Conv2d(10,20,5).to('cuda:0'),
@@ -46,7 +46,7 @@ def test_split_module_0():
     assert next(partitions[0].parameters()).device == devices[0]
     assert next(partitions[1].parameters()).device == devices[1]
 
-@pytest.mark.a4_2_1
+@pytest.mark.a5_2_1
 def test_split_module_1():
     model = nn.Sequential(
           nn.Conv2d(10,20,5).to('cuda:0'),
@@ -59,7 +59,7 @@ def test_split_module_1():
     assert next(partitions[0].parameters()).device == devices[0]
     assert next(partitions[1].parameters()).device == devices[1]
 
-@pytest.mark.a4_2_2
+@pytest.mark.a5_2_2
 @pytest.mark.parametrize("batch_size", [1, 16, 32, 64])
 @pytest.mark.parametrize("split_size", [1, 2, 4, 8, 16])
 def test_forward_0(batch_size, split_size):

@@ -40,7 +40,6 @@ def _assemble_partition(modules: List[nn.Module]):
             modules_list.append(module)
     return nn.Sequential(*modules_list)
 
-# Assignment 4.2
 def _split_module(modules: nn.Sequential) -> Tuple[List[nn.Sequential], List[torch.device]]:
     '''Split an nn.Sequential module into partitions and devices.
 
@@ -58,9 +57,9 @@ def _split_module(modules: nn.Sequential) -> Tuple[List[nn.Sequential], List[tor
     current_partition = []
     current_device = None
     for name, module in modules.named_children():
-        # BEGIN SOLUTION
+        # BEGIN ASSIGN5_2_1
         raise NotImplementedError("Module Splitting Not Implemented Yet")
-        # END SOLUTION
+        # END ASSIGN5_2_1
 
     if current_device is not None:
         partitions.append(_assemble_partition(current_partition))
