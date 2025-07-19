@@ -24,7 +24,6 @@ from utils import get_tokenizer, evaluate_bleu, save_grad_weights, collate_batch
 
 PYTEST = False
 
-# ASSIGNMENT 4.1
 def average_gradients(model):
     '''Aggregate the gradients from different GPUs
     
@@ -32,20 +31,19 @@ def average_gradients(model):
     2. Use `torch.distributed` package and call the reduce fucntion to aggregate the gradients of all the parameters
     3. Average the gradients over the world_size (total number of devices)
     '''
-    # BEGIN SOLUTION
+    # BEGIN ASSIGN5_1_2
     raise NotImplementedError("Data Parallel Not Implemented Yet")
-    # END SOLUTION
+    # END ASSIGN5_1_2
 
-# ASSIGNMENT 4.1
 def setup(rank, world_size, backend):
     '''Setup Process Group
 
     1. Set the environment variables `MASTER_ADDR` as `localhost` or `127.0.0.1`  and `MASTER_PORT` as `11868`
     2. Use `torch.distributed` to init the process group
     '''
-    # BEGIN SOLUTION
+    # BEGIN ASSIGN5_1_2
     raise NotImplementedError("Data Parallel Not Implemented Yet")
-    # END SOLUTION
+    # END ASSIGN5_1_2
 
 
 def run_dp(
@@ -183,16 +181,15 @@ if __name__ == '__main__':
 
     processes = []
 
-    # ASSIGNMENT 4.1
     '''Create Process to start distributed training
 
     Hint:
     1. You can use Process from torch.distributed to define the process
     2. You should start the processes to work and terminate resources properly
     '''
-    # BEGIN SOLUTION
+    # BEGIN ASSIGN5_1_2
     world_size = None  # TODO: Define the number of GPUs
     backend = None  # TODO: Define your backend for communication, we suggest using 'nccl'
     
     raise NotImplementedError("Data Parallel Not Implemented Yet")
-    # END SOLUTION
+    # END ASSIGN5_1_2
