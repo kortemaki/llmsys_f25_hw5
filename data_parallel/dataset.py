@@ -1,4 +1,6 @@
 from random import Random
+
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
 import torch.distributed as dist
