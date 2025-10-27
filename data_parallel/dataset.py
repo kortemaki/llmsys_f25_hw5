@@ -13,7 +13,7 @@ def saferound(fracs: np.array) -> np.array:
     Ensures that sum(assignments) == sum(fracs)
     """
     assignments = fracs.astype(int)
-    to_assign = fracs.sum() - assigments.sum()
+    to_assign = fracs.sum() - assignments.sum()
     if to_assign != int(to_assign):
         raise ValueError("fracs must sum to an integer!")
     i = 0
@@ -99,7 +99,7 @@ def partition_dataset(rank, world_size, dataset, batch_size=128, collate_fn=None
     """
     # BEGIN ASSIGN5_1
     partitioned_sizes = world_size * [1 / world_size]
-    batch_size = saferound(world_size * [batch_size / world_size])[rank]
+    batch_size = saferound(np.array(world_size * [batch_size / world_size]))[rank]
 
     parts = DataPartitioner(dataset, partitioned_sizes)
     return DataLoader(parts.use(rank), batch_size=batch_size, collate_fn=collate_fn)
