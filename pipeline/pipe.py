@@ -30,10 +30,14 @@ def _clock_cycles(num_batches: int, num_partitions: int) -> Iterable[List[Tuple[
     # BEGIN ASSIGN5_2_1
     # construct each columns of the above table separately
     jobs = [
-        j * [None] + \                               # bubbles at the start of the column
-        [(i, j) for i in range(num_partitions)] + \  # the job_steps in the job
-        (num_batches - 1 - j) * [None]               # bubbles at the end of the column
-        for j in range(num_batches)
+        (
+            # bubbles at the start of the column
+            j * [None]
+            # the job_steps in the job
+            + [(i, j) for i in range(num_partitions)]
+            # bubbles at the end of the column
+            + (num_batches - 1 - j) * [None]
+        ) for j in range(num_batches)
     ]
 
     # yield each row of the schedule by zipping the columns
