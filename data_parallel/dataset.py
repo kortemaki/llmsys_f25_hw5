@@ -2,7 +2,24 @@ from random import Random
 import torch
 from torch.utils.data import DataLoader
 import torch.distributed as dist
-from iteround import saferound
+
+
+def saferound(fracs: np.array) -> np.array:
+    """
+    Simplified version of iteround.saferound that works for this case.
+
+    Ensures that sum(assignments) == sum(fracs)
+    """
+    assignments = fracs.astype(int)
+    to_assign = fracs.sum() - assigments.sum()
+    if to_assign != int(to_assign):
+        raise ValueError("fracs must sum to an integer!")
+    i = 0
+    while to_assign:
+        to_assign -= 1
+        assignments[i] += 1
+        i += 1
+    return assignments
 
 
 class Partition():
@@ -18,6 +35,7 @@ class Partition():
         # BEGIN ASSIGN5_1_1
         return self.data[self.index[index]]
         # END ASSIGN5_1_1
+
 
 class DataPartitioner():
     def __init__(self, data, sizes=[0.7, 0.2, 0.1], seed=1234):
@@ -64,6 +82,7 @@ class DataPartitioner():
         return self.partitions[partition]
         # END ASSIGN5_1_1
 
+
 def partition_dataset(rank, world_size, dataset, batch_size=128, collate_fn=None):
     """ Partitioning training dataset of the Machine Translation
 
@@ -78,7 +97,7 @@ def partition_dataset(rank, world_size, dataset, batch_size=128, collate_fn=None
     """
     # BEGIN ASSIGN5_1
     partitioned_sizes = world_size * [1 / world_size]
-    batch_size = saferound(world_size * [batch_size / world_size], 0)[rank]
+    batch_size = saferound(world_size * [batch_size / world_size])[rank]
 
     parts = DataPartitioner(dataset, partitioned_sizes)
     return DataLoader(parts.use(rank), batch_size=batch_size, collate_fn=collate_fn)
