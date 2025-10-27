@@ -1,3 +1,5 @@
+from functools import partial
+import math
 from typing import Any, Iterable, Iterator, List, Optional, Union, Sequence, Tuple, cast
 
 import torch
@@ -11,7 +13,7 @@ def _clock_cycles(num_batches: int, num_partitions: int) -> Iterable[List[Tuple[
     '''Generate schedules for each clock cycle.
 
     An example of the generated schedule for m=3 and n=3 is as follows:
-    
+
     k (i,j) (i,j) (i,j)
     - ----- ----- -----
     0 (0,0)
@@ -26,7 +28,17 @@ def _clock_cycles(num_batches: int, num_partitions: int) -> Iterable[List[Tuple[
     This function should yield schedules for each clock cycle.
     '''
     # BEGIN ASSIGN5_2_1
-    raise NotImplementedError("Schedule Generation Not Implemented Yet")
+    # construct each columns of the above table separately
+    jobs = [
+        j * [None] + \                               # bubbles at the start of the column
+        [(i, j) for i in range(num_partitions)] + \  # the job_steps in the job
+        (num_batches - 1 - j) * [None]               # bubbles at the end of the column
+        for j in range(num_batches)
+    ]
+
+    # yield each row of the schedule by zipping the columns
+    for clock_cycle in zip(*jobs):
+        yield [job_step for job_step in clock_cycle if job_step]  # drop bubbles
     # END ASSIGN5_2_1
 
 class Pipe(nn.Module):
@@ -49,11 +61,18 @@ class Pipe(nn.Module):
         2. Generate the clock schedule.
         3. Call self.compute to compute the micro-batches in parallel.
         4. Concatenate the micro-batches to form the mini-batch and return it.
-        
+
         Please note that you should put the result on the last device. Putting the result on the same device as input x will lead to pipeline parallel training failing.
         '''
         # BEGIN ASSIGN5_2_2
-        raise NotImplementedError("Pipeline Parallel Not Implemented Yet")
+        n, *_ = x.shape
+        m = math.ceil(n / self.split_size)  # number of microbatches
+        microbatches = [{0: mb)} for mb in torch.split(x, self.split_size, dim=0)]
+
+        for schedule in _clock_cycles(num_batches=m, num_partitions=len(self.devices)):
+            self.compute(microbatches, schedule)
+
+        return torch.cat([microbatches[i][len(self.devices)] for i in range(m)], dim=0).to(device=self.devices[-1])
         # END ASSIGN5_2_2
 
     def compute(self, batches, schedule: List[Tuple[int, int]]) -> None:
@@ -61,7 +80,7 @@ class Pipe(nn.Module):
 
         Hint:
         1. Retrieve the partition and microbatch from the schedule.
-        2. Use Task to send the computation to a worker. 
+        2. Use Task to send the computation to a worker.
         3. Use the in_queues and out_queues to send and receive tasks.
         4. Store the result back to the batches.
         '''
@@ -69,6 +88,15 @@ class Pipe(nn.Module):
         devices = self.devices
 
         # BEGIN ASSIGN5_2_2
-        raise NotImplementedError("Pipeline Parallel Not Implemented Yet")
-        # END ASSIGN5_2_2
+        # dispatch the tasks
+        for (mb_id, device_id) in schedule:
+            job_step = partial(self.partitions[device_id], batches[mb_id][device_id].to(self.devices[device_id]))
+            self.in_queues[device_id].put(Task(job_step))
 
+        # process the results
+        for (mb_id, device_id) in schedule:
+            success, result = self.out_queues[device_id].get()  # blocks until results are available
+            if not success:
+                raise RuntimeError(result)
+            _, batches[mb_id][device_id + 1] = result  # result is task, batch
+        # END ASSIGN5_2_2
