@@ -2,20 +2,21 @@ from random import Random
 import torch
 from torch.utils.data import DataLoader
 import torch.distributed as dist
+from iteround import saferound
 
 
 class Partition():
     def __init__(self, data, index):
         self.data = data
         self.index = index
-    
+
     def __len__(self):
         return len(self.index)
-    
+
     def __getitem__(self, index):
         '''Given index, get the data according to the partitioned index'''
         # BEGIN ASSIGN5_1_1
-        raise NotImplementedError("Data Parallel Not Implemented Yet")
+        return self.data[self.index[index]]
         # END ASSIGN5_1_1
 
 class DataPartitioner():
@@ -29,7 +30,29 @@ class DataPartitioner():
         2. Create different partitions of indices according to `sizes` and store in `self.partitions`
         '''
         # BEGIN ASSIGN5_1_1
-        raise NotImplementedError("Data Parallel Not Implemented Yet")
+        # ensure sizes sums to 1
+        sizes = np.array(sizes)
+        sizes = sizes / np.sum(sizes)
+
+        # map sizes to integer split points of the datapoints
+        n = len(self.data)
+        sizes = saferound(sizes * n, 0)
+        splits = np.cumsum(sizes)
+
+        # split index according to sizes
+        index = list(range(n))
+        rng.shuffle(index)
+        index = np.array(index)
+        indices = np.split(index, np.cumsum(splits))
+
+        # create partitions
+        self.partitions = [
+            Partition(
+                data=self.data,
+                index=indices[i]
+            )
+            for i in range(len(sizes)) # use sizes here because it is the correct length
+        ]
         # END ASSIGN5_1_1
 
     def use(self, partition):
@@ -38,7 +61,7 @@ class DataPartitioner():
         Just one line of code. Think it simply.
         '''
         # BEGIN ASSIGN5_1_1
-        raise NotImplementedError("Data Parallel Not Implemented Yet")
+        return self.partitions[partition]
         # END ASSIGN5_1_1
 
 def partition_dataset(rank, world_size, dataset, batch_size=128, collate_fn=None):
@@ -46,7 +69,7 @@ def partition_dataset(rank, world_size, dataset, batch_size=128, collate_fn=None
 
     Returns:
         DataLoader: partitioned dataloader
-    
+
     Hint:
     1. Calculate the partitioned batch size
     2. Create a partitioner class `DataPartitioner` with dataset and the list of partitioned sizes
@@ -54,5 +77,9 @@ def partition_dataset(rank, world_size, dataset, batch_size=128, collate_fn=None
     4. Wrap the dataset with `DataLoader`, remember to customize the `collate_fn`
     """
     # BEGIN ASSIGN5_1
-    raise NotImplementedError("Data Parallel Not Implemented Yet")
+    partitioned_sizes = world_size * [1 / world_size]
+    batch_size = saferound(world_size * [batch_size / world_size], 0)[rank]
+
+    parts = DataPartitioner(dataset, partitioned_sizes)
+    return DataLoader(parts.use(rank), batch_size=batch_size, collate_fn=collate_fn)
     # END ASSIGN5_1
