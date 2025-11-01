@@ -1,3 +1,4 @@
+from filelock import FileLock
 import os
 import sys
 from pathlib import Path
@@ -159,4 +160,6 @@ def save_grad_weights(model, rank):
     for name, param in model.named_parameters():
         if param.grad is not None:
             gradients[name] = param.grad.data.detach().cpu()
-    torch.save(gradients, f'{cousin_dir}/tests/model{rank}_gradients.pth')
+    lock = FileLock(f'{cousin_dir}/tests/model_gradients.lock')
+    with lock:
+        torch.save(gradients, f'{cousin_dir}/tests/model{rank}_gradients.pth')
