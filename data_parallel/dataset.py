@@ -99,7 +99,7 @@ def partition_dataset(rank, world_size, dataset, batch_size=128, collate_fn=None
     """
     # BEGIN ASSIGN5_1
     partitioned_sizes = world_size * [1 / world_size]
-    batch_size = saferound(np.array(world_size * [batch_size / world_size]))[rank]
+    batch_size = saferound(np.array(world_size * [batch_size / world_size]))[rank].item()
 
     parts = DataPartitioner(dataset, partitioned_sizes)
     return DataLoader(parts.use(rank), batch_size=batch_size, collate_fn=collate_fn)
