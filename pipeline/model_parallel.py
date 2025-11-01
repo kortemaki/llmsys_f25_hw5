@@ -38,10 +38,17 @@ class GPT2ModelParallel(GPT2ModelCustom):
         Please note that when implementing _prepare_pipeline_parallel, you would want to define the nn.Sequential module to extract useful values from the returned tuple. GPT2Block returns a tuple, not a tensor.
         You should construct nn.Sequential using GPT2Block modules. Notice that each block returns multiple values but you will only need the hidden states.
         '''
+        class GPT2BlockCustom(nn.Module):
+            def __init__(self, layer):
+                super().__init__()
+                self._layer = layer
+
+            def forward(self, x):
+                return self._layer.forward(x)[0]
 
         # BEGIN ASSIGN5_2_3
         pipe = Pipe(
-            nn.Sequential(*[ExtractFirstItem()(layer) for layer in self.h]),
+            nn.Sequential(*[GPT2BlockCustom(layer) for layer in self.h]),
             split_size=split_size,
         )
         # END ASSIGN5_2_3
