@@ -225,6 +225,6 @@ if __name__ == '__main__':
     # clean up once finished
     for process in processes:
         process.join()
-    torch.distributed.destroy_process_group()
-
+    # I tried using torch.distributed.destroy_process_group here but was consistently getting AssertionError
+    # it seems like it is not necessary to call this if all processes are joined explicitly as above.
     # END ASSIGN5_1_3

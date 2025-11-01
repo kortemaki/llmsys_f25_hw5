@@ -162,4 +162,5 @@ def save_grad_weights(model, rank):
             gradients[name] = param.grad.data.detach().cpu()
     lock = FileLock(f'{cousin_dir}/tests/model_gradients.lock')
     with lock:
+        print(f"Writing to file {cousin_dir}/tests/model{rank}_gradients.pth")
         torch.save(gradients, f'{cousin_dir}/tests/model{rank}_gradients.pth')
