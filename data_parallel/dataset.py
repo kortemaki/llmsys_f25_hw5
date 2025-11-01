@@ -56,7 +56,7 @@ class DataPartitioner():
 
         # map sizes to integer split points of the datapoints
         n = len(self.data)
-        sizes = saferound(sizes * n, 0)
+        sizes = saferound(sizes * n)
         splits = np.cumsum(sizes)
 
         # split index according to sizes
