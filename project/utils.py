@@ -63,7 +63,7 @@ def collate_batch(
 
     token_ids = torch.tensor(token_ids, device=device)
     tgt_token_mask = torch.tensor(tgt_token_mask, device=device)
-    
+
     return {
         'input_ids': token_ids[:, :-1],
         'labels': token_ids[:, 1:],
@@ -122,7 +122,7 @@ def generate(model, examples, src_key, tgt_key, tokenizer, model_max_length, dev
 
 def train(model, optimizer, examples, batch_size, collate_fn, desc, rank=0, average_gradients_fn=None):
     model.train()
-    
+
     tokens_per_sec = []
     tokens_num = []
     for i, batch in enumerate(prog_bar := tqdm.tqdm(examples, desc=f'Training ({desc})')):
@@ -141,7 +141,7 @@ def train(model, optimizer, examples, batch_size, collate_fn, desc, rank=0, aver
             Just few lines of code. Think simply.
         '''
         # BEGIN SOLUTION
-        raise NotImplementedError("Data Parallel Not Implemented Yet")
+        average_gradients_fn(model)
         # END SOLUTION
         optimizer.step()
         batch_time = time.time() - t0
