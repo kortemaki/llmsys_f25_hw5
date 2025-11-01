@@ -41,7 +41,7 @@ class GPT2ModelParallel(GPT2ModelCustom):
 
         # BEGIN ASSIGN5_2_3
         pipe = Pipe(
-            nn.Sequential([ExtractFirstItem(layer) for layer in self.h]),
+            nn.Sequential(*[ExtractFirstItem()(layer) for layer in self.h]),
             split_size=split_size,
         )
         # END ASSIGN5_2_3
