@@ -97,6 +97,10 @@ class Pipe(nn.Module):
             job_step = partial(self.partitions[device_id], batches[mb_id].to(self.devices[device_id]))
             self.in_queues[device_id].put(Task(job_step))
 
+        # spin until results are becoming ready
+        while all(q.empty() for q in self.in_queues):
+            pass
+
         # process the results
         for (mb_id, device_id) in schedule:
             success, result = self.out_queues[device_id].get()  # blocks until results are available
