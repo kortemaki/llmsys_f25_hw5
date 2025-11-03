@@ -71,12 +71,12 @@ class Pipe(nn.Module):
         # BEGIN ASSIGN5_2_2
         n, *_ = x.shape
         m = math.ceil(n / self.split_size)  # number of microbatches
-        microbatches = [{0: mb} for mb in torch.split(x, self.split_size, dim=0)]
+        microbatches = torch.split(x, self.split_size, dim=0)
 
         for schedule in _clock_cycles(num_batches=m, num_partitions=len(self.devices)):
             self.compute(microbatches, schedule)
 
-        return torch.cat([microbatches[i][len(self.devices)] for i in range(m)], dim=0).to(device=self.devices[-1])
+        return torch.cat(microbatches, dim=0).to(device=self.devices[-1])
         # END ASSIGN5_2_2
 
     def compute(self, batches, schedule: List[Tuple[int, int]]) -> None:
@@ -94,7 +94,7 @@ class Pipe(nn.Module):
         # BEGIN ASSIGN5_2_2
         # dispatch the tasks
         for (mb_id, device_id) in schedule:
-            job_step = partial(self.partitions[device_id], batches[mb_id][device_id].to(self.devices[device_id]))
+            job_step = partial(self.partitions[device_id], batches[mb_id].to(self.devices[device_id]))
             self.in_queues[device_id].put(Task(job_step))
 
         # process the results
@@ -102,5 +102,5 @@ class Pipe(nn.Module):
             success, result = self.out_queues[device_id].get()  # blocks until results are available
             if not success:
                 raise RuntimeError(result)
-            _, batches[mb_id][device_id + 1] = result  # result is task, batch
+            _, batches[mb_id] = result  # result is task, batch
         # END ASSIGN5_2_2
