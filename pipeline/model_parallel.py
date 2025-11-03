@@ -39,8 +39,8 @@ class GPT2ModelParallel(GPT2ModelCustom):
         You should construct nn.Sequential using GPT2Block modules. Notice that each block returns multiple values but you will only need the hidden states.
         '''
 
-        self.pipeline_parallel = True
         # BEGIN ASSIGN5_2_3
+        self.pipeline_parallel = True
         pipe = Pipe(
             nn.Sequential(*[nn.Sequential(layer, ExtractFirstItem()) for layer in self.h]),
             split_size=split_size,
