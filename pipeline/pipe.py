@@ -71,7 +71,10 @@ class Pipe(nn.Module):
         # BEGIN ASSIGN5_2_2
         n, *_ = x.shape
         m = math.ceil(n / self.split_size)  # number of microbatches
-        microbatches = list(torch.split(x, self.split_size, dim=0))
+        microbatches = [
+            mb.to(self.devices[0], non_blocking=True)
+            for mb in list(torch.split(x, self.split_size, dim=0))
+        ]
 
         for schedule in _clock_cycles(num_batches=m, num_partitions=len(self.devices)):
             self.compute(microbatches, schedule)
