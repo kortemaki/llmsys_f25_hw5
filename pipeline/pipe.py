@@ -1,6 +1,5 @@
 from functools import partial
 import math
-from operator import itemgetter
 from typing import Any, Iterable, Iterator, List, Optional, Union, Sequence, Tuple, cast
 
 import torch
@@ -93,14 +92,10 @@ class Pipe(nn.Module):
         devices = self.devices
 
         # BEGIN ASSIGN5_2_2
-        # trigger data moves
-        for (mb_id, device_id) in schedule:
-            # use non_blocking to overlap data transfers
-            batches[mb_id] = batches[mb_id].to(self.devices[device_id], non_blocking=True)
-
         # dispatch the tasks
         for (mb_id, device_id) in schedule:
-            job_step = partial(self.partitions[device_id], batches[mb_id])
+            # use non_blocking to overlap data transfers
+            job_step = partial(self.partitions[device_id], batches[mb_id].to(self.devices[device_id], non_blocking=True))
             self.in_queues[device_id].put(Task(job_step))
 
         # process results for completed tasks
