@@ -1,4 +1,3 @@
-from functools import partial
 import math
 from typing import Any, Iterable, Iterator, List, Optional, Union, Sequence, Tuple, cast
 
@@ -94,7 +93,7 @@ class Pipe(nn.Module):
         # BEGIN ASSIGN5_2_2
         # dispatch the tasks
         for (mb_id, device_id) in schedule:
-            job_step = partial(self.partitions[device_id], batches[mb_id].to(self.devices[device_id]))
+            job_step = lambda: self.partitions[device_id](batches[mb_id].to(self.devices[device_id]))
             self.in_queues[device_id].put(Task(job_step))
 
         # track the active jobs
