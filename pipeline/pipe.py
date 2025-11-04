@@ -1,5 +1,6 @@
 from functools import partial
 import math
+from operator import itemgetter
 from typing import Any, Iterable, Iterator, List, Optional, Union, Sequence, Tuple, cast
 
 import torch
@@ -71,8 +72,9 @@ class Pipe(nn.Module):
         # BEGIN ASSIGN5_2_2
         n, *_ = x.shape
         m = math.ceil(n / self.split_size)  # number of microbatches
-        x = x.to(self.devices[0])  # pre-move batch to device 0
         microbatches = list(torch.split(x, self.split_size, dim=0))
+        # pre move first microbatch
+        microbatches[0] = microbatches[0].to(self.devices[0], non_blocking=True)
 
         for schedule in _clock_cycles(num_batches=m, num_partitions=len(self.devices)):
             self.compute(microbatches, schedule)
@@ -103,6 +105,11 @@ class Pipe(nn.Module):
             )
             job_step = partial(self.partitions[device_id], mb_gpu)
             self.in_queues[device_id].put(Task(job_step))
+
+        # pre move next microbatch while waiting
+        last_active_batch, last_active_batch_device = max(schedule, key=itemgetter(0))
+        if last_active_batch_device == 0 and last_active_batch < len(batches) - 1:
+            batches[last_active_batch + 1] = batches[last_active_batch + 1].to(self.devices[0], non_blocking=True)
 
         # process results for completed tasks
         for (mb_id, device_id) in schedule:
