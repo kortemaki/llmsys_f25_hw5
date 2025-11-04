@@ -71,10 +71,8 @@ class Pipe(nn.Module):
         # BEGIN ASSIGN5_2_2
         n, *_ = x.shape
         m = math.ceil(n / self.split_size)  # number of microbatches
-        microbatches = [
-            mb.to(self.devices[0], non_blocking=True)
-            for mb in list(torch.split(x, self.split_size, dim=0))
-        ]
+        x = x.to(self.devices[0])  # pre-move batch to device 0
+        microbatches = list(torch.split(x, self.split_size, dim=0))
 
         for schedule in _clock_cycles(num_batches=m, num_partitions=len(self.devices)):
             self.compute(microbatches, schedule)
@@ -97,8 +95,12 @@ class Pipe(nn.Module):
         # BEGIN ASSIGN5_2_2
         # dispatch the tasks
         for (mb_id, device_id) in schedule:
-            # overlap data transfers
-            mb_gpu = batches[mb_id].to(self.devices[device_id], non_blocking=True)
+            # microbatches start on device 0
+            # use non_blocking to overlap data transfers
+            mb_gpu = (
+                batches[mb_id].to(self.devices[device_id], non_blocking=True) if device_id
+                else batches[mb_id]
+            )
             job_step = partial(self.partitions[device_id], mb_gpu)
             self.in_queues[device_id].put(Task(job_step))
 
